@@ -1,0 +1,13 @@
+[general]
+name=GeoMigrate QA
+qgisMinimumVersion=3.34
+description=Migrate CAD, KML/KMZ and Shapefile data to PostGIS with automated validation
+version=0.1.0
+author=Leela Lahari M
+email=hinamark88@gmail.com
+about=Imports DXF, KML/KMZ, Shapefile, GeoJSON and GPKG data, maps schemas, reprojects, validates with configurable rules, loads to PostGIS and reports errors.
+repository=https://github.com/LeelaLahari/geomigrate-qa
+tracker=https://github.com/LeelaLahari/geomigrate-qa/issues
+tags=migration,validation,postgis,dxf,kml,qa
+experimental=True
+supportsQt6=True
