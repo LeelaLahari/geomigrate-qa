@@ -1,5 +1,5 @@
-from qgis.PyQt.QtWidgets import QAction
 from qgis.core import Qgis
+from qgis.PyQt.QtWidgets import QAction
 
 MENU = "&GeoMigrate QA"
 
