@@ -1,0 +1,42 @@
+{
+  "name": "telecom_default",
+  "tolerance_m": 0.01,
+  "layers": {
+    "poles": {
+      "id_field": "pole_id",
+      "rules": [
+        {"rule": "null_required", "fields": ["pole_id", "material", "height_m"]},
+        {"rule": "duplicate_id", "field": "pole_id"},
+        {"rule": "domain", "field": "material", "allowed": ["RCC", "STEEL", "WOOD"]},
+        {"rule": "range", "field": "height_m", "min": 0, "min_inclusive": false, "max": 60},
+        {"rule": "duplicate_geometry"},
+        {"rule": "invalid_geometry"}
+      ]
+    },
+    "towers": {
+      "id_field": "tower_id",
+      "rules": [
+        {"rule": "null_required", "fields": ["tower_id", "site_name", "height_m", "owner"]},
+        {"rule": "duplicate_id", "field": "tower_id"},
+        {"rule": "range", "field": "height_m", "min": 0, "min_inclusive": false, "max": 150},
+        {"rule": "duplicate_geometry"},
+        {"rule": "out_of_extent", "reference_layer": "poles", "buffer_m": 500},
+        {"rule": "invalid_geometry"}
+      ]
+    },
+    "cables": {
+      "id_field": "cable_id",
+      "rules": [
+        {"rule": "null_required", "fields": ["cable_id", "cable_type"]},
+        {"rule": "duplicate_id", "field": "cable_id"},
+        {"rule": "domain", "field": "cable_type", "allowed": ["AERIAL", "UG"]},
+        {"rule": "range", "field": "fiber_count", "min": 1, "max": 864},
+        {"rule": "length_mismatch", "field": "length_m", "tolerance_m": 0.05},
+        {"rule": "zero_length"},
+        {"rule": "duplicate_geometry"},
+        {"rule": "dangling_end", "nodes": ["poles", "towers"], "tolerance_m": 0.05},
+        {"rule": "invalid_geometry"}
+      ]
+    }
+  }
+}
