@@ -1,0 +1,13 @@
+{
+  "name": "poles_from_shapefile",
+  "target_layer": "poles",
+  "target_crs": "EPSG:32643",
+  "assume_source_crs": "EPSG:4326",
+  "geometry_type": "Point",
+  "fields": [
+    {"target": "pole_id", "source": "pole_id", "type": "string", "transforms": ["strip", "upper"]},
+    {"target": "material", "source": "material", "type": "string", "transforms": ["strip", "upper"]},
+    {"target": "height_m", "source": "height_m", "type": "double"},
+    {"target": "status", "source": "status", "type": "string", "transforms": ["strip", "upper"], "default": "ACTIVE"}
+  ]
+}

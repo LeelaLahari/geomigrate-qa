@@ -1,0 +1,12 @@
+{
+  "name": "towers_from_kml",
+  "target_layer": "towers",
+  "target_crs": "EPSG:32643",
+  "geometry_type": "Point",
+  "fields": [
+    {"target": "tower_id", "source": "tower_id", "type": "string", "transforms": ["strip", "upper"]},
+    {"target": "site_name", "source": "Name", "type": "string", "transforms": ["strip"]},
+    {"target": "height_m", "source": "height_m", "type": "double"},
+    {"target": "owner", "source": "owner", "type": "string", "transforms": ["strip"]}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "cables_from_dxf",
+  "target_layer": "cables",
+  "target_crs": "EPSG:32643",
+  "assume_source_crs": "EPSG:32643",
+  "geometry_type": "Line",
+  "fields": [
+    {"target": "cable_id", "source": "EntityHandle", "type": "string"},
+    {"target": "cable_type", "source": "Layer", "type": "string",
+     "value_map": {"CABLE_AERIAL": "AERIAL", "CABLE_UG": "UG"}},
+    {"target": "fiber_count", "type": "int"},
+    {"target": "length_m", "type": "double", "compute": "length"},
+    {"target": "status", "type": "string", "default": "ACTIVE"}
+  ]
+}

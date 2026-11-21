@@ -10,4 +10,3 @@ repository=https://github.com/LeelaLahari/geomigrate-qa
 tracker=https://github.com/LeelaLahari/geomigrate-qa/issues
 tags=migration,validation,postgis,dxf,kml,qa
 experimental=True
-supportsQt6=True
