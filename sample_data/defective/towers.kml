@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="towers" id="towers">
+	<SimpleField name="tower_id" type="string"></SimpleField>
+	<SimpleField name="height_m" type="float"></SimpleField>
+	<SimpleField name="owner" type="string"></SimpleField>
+</Schema>
+<Folder><name>towers</name>
+  <Placemark id="towers.1">
+	<name>Site-01</name>
+	<ExtendedData><SchemaData schemaUrl="#towers">
+		<SimpleData name="tower_id">T01</SimpleData>
+		<SimpleData name="height_m">30.1</SimpleData>
+		<SimpleData name="owner">OperatorA</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>73.860894585206,18.5224599952378</coordinates></Point>
+  </Placemark>
+  <Placemark id="towers.2">
+	<name>Site-02</name>
+	<ExtendedData><SchemaData schemaUrl="#towers">
+		<SimpleData name="tower_id">T02</SimpleData>
+		<SimpleData name="height_m">42.9</SimpleData>
+		<SimpleData name="owner">OperatorA</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>73.8620405521549,18.5207672445093</coordinates></Point>
+  </Placemark>
+  <Placemark id="towers.3">
+	<name>Site-03</name>
+	<ExtendedData><SchemaData schemaUrl="#towers">
+		<SimpleData name="tower_id">T03</SimpleData>
+		<SimpleData name="height_m">37.3</SimpleData>
+		<SimpleData name="owner">OperatorA</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>18.5224093873431,73.86286200628</coordinates></Point>
+  </Placemark>
+  <Placemark id="towers.4">
+	<name>Site-04</name>
+	<ExtendedData><SchemaData schemaUrl="#towers">
+		<SimpleData name="tower_id">T04</SimpleData>
+		<SimpleData name="height_m">38.6</SimpleData>
+		<SimpleData name="owner">OperatorA</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>73.8631070973541,18.5222078425846</coordinates></Point>
+  </Placemark>
+  <Placemark id="towers.5">
+	<ExtendedData><SchemaData schemaUrl="#towers">
+		<SimpleData name="tower_id">T05</SimpleData>
+		<SimpleData name="height_m">32.9</SimpleData>
+		<SimpleData name="owner">OperatorA</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>73.8626153787332,18.5209762527852</coordinates></Point>
+  </Placemark>
+  <Placemark id="towers.6">
+	<name>Site-06</name>
+	<ExtendedData><SchemaData schemaUrl="#towers">
+		<SimpleData name="tower_id">T06</SimpleData>
+		<SimpleData name="height_m">36.2</SimpleData>
+		<SimpleData name="owner">OperatorA</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>73.8626613044182,18.5226841160804</coordinates></Point>
+  </Placemark>
+  <Placemark id="towers.7">
+	<name>Site-01</name>
+	<ExtendedData><SchemaData schemaUrl="#towers">
+		<SimpleData name="tower_id">T01</SimpleData>
+		<SimpleData name="height_m">30.1</SimpleData>
+		<SimpleData name="owner">OperatorA</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>73.860894585206,18.5224599952378</coordinates></Point>
+  </Placemark>
+</Folder>
+</Document></kml>
