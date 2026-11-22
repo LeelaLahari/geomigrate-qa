@@ -1,0 +1,11 @@
+{
+  "label": "demo run",
+  "sources": {
+    "poles":  {"file": "defective/poles.shp",  "template": "bundled:poles_shp.json"},
+    "towers": {"file": "defective/towers.kml", "template": "bundled:towers_kml.json"},
+    "cables": {"file": "defective/cables.dxf", "template": "bundled:cables_dxf.json"}
+  },
+  "rules": "bundled:telecom_default.json",
+  "reference_gpkg": "clean/network.gpkg",
+  "schema": "demo"
+}
