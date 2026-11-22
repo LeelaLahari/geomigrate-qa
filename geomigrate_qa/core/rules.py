@@ -55,8 +55,10 @@ class ValidationReport:
 
 
 class _Context:
-    def __init__(self, layers, tolerance):
+    def __init__(self, layers, tolerance, reference=None):
         self.layers = layers
+        # Node and extent lookups prefer a trusted reference inventory over the data being checked.
+        self.lookup = {**layers, **(reference or {})}
         self.tolerance = tolerance
         self.decimals = max(0, round(-math.log10(tolerance)))
 
@@ -189,10 +191,10 @@ def rule_invalid_geometry(ctx, name, layer, spec, id_field):
 def _node_grid(ctx, node_layers, cell):
     grid = defaultdict(list)
     for node_name in node_layers:
-        if node_name not in ctx.layers:
+        if node_name not in ctx.lookup:
             raise RuleConfigError(f"Layer '{node_name}' is needed as a node layer but was "
                                   "not supplied.")
-        for f in ctx.layers[node_name].getFeatures():
+        for f in ctx.lookup[node_name].getFeatures():
             if f.geometry().isNull():
                 continue
             p = f.geometry().asPoint()
@@ -226,10 +228,10 @@ def rule_dangling_end(ctx, name, layer, spec, id_field):
 
 def rule_out_of_extent(ctx, name, layer, spec, id_field):
     ref = spec.params["reference_layer"]
-    if ref not in ctx.layers:
+    if ref not in ctx.lookup:
         raise RuleConfigError(f"Reference layer '{ref}' was not supplied.")
     box = QgsRectangle()
-    for f in ctx.layers[ref].getFeatures():
+    for f in ctx.lookup[ref].getFeatures():
         if not f.geometry().isNull():
             box.combineExtentWith(f.geometry().boundingBox())
     if box.isNull():
@@ -270,14 +272,16 @@ RULES = {
 }
 
 
-def validate(layers: dict, config, only=None) -> ValidationReport:
+def validate(layers: dict, config, only=None, reference=None) -> ValidationReport:
     """Run the configured rules.
 
     layers: {layer name: QgsVectorLayer}. only: restrict checking to these layer names
     (other supplied layers can still be used as node or reference layers).
+    reference: optional {layer name: QgsVectorLayer} trusted inventory used for node and
+    extent lookups instead of the layers being checked.
     """
     config = load_rule_config(config)
-    ctx = _Context(layers, config.tolerance_m)
+    ctx = _Context(layers, config.tolerance_m, reference)
     report = ValidationReport()
     for layer_rules in config.layers:
         name = layer_rules.layer
