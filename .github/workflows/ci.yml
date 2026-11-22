@@ -1,12 +1,19 @@
 name: CI
+
 on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
+  # Fast checks: lint and the tests that need no QGIS (also runs the sample-data tests).
   unit:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.12"]
     steps:
@@ -15,7 +22,36 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -r requirements-dev.txt
+      - run: pip install -r requirements-data.txt
       - run: ruff check .
       - run: pytest -q
-      - run: pip install -r requirements-data.txt
-      - run: pip install -r requirements-data.txt
+
+  # Full checks: every test, inside the official QGIS image, against a real PostGIS database.
+  qgis:
+    needs: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: geomigrate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d geomigrate"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run all tests in the QGIS image
+        run: |
+          docker run --rm --network host \
+            -v "${{ github.workspace }}:/src" -w /src \
+            -e QT_QPA_PLATFORM=offscreen \
+            -e PYTHONDONTWRITEBYTECODE=1 \
+            -e GEOMIGRATE_PG_HOST=127.0.0.1 \
+            qgis/qgis:release-3_44 \
+            sh -c "python3 -m pip install --break-system-packages pytest pytest-qgis && python3 -m pytest -q -rs -p no:cacheprovider"
