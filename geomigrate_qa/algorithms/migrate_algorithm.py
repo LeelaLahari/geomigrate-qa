@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingOutputNumber,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFile,
+    QgsProcessingParameterFolderDestination,
     QgsProcessingParameterProviderConnection,
     QgsProcessingParameterString,
     QgsProviderRegistry,
@@ -17,6 +18,7 @@ from qgis.core import (
 
 from ..core.mapping import MappingError
 from ..core.postgis_loader import LoadError, PgConnection
+from ..core.report_pdf import export_reports
 from ..core.rule_config import RuleConfigError
 from ..core.runconfig import RunConfigError, load_run_config
 from ..core.service import run_from_config, summarize
@@ -27,6 +29,7 @@ class MigrateAlgorithm(QgsProcessingAlgorithm):
     CONNECTION = "CONNECTION"
     SCHEMA = "SCHEMA"
     ERRORS = "ERRORS"
+    REPORT_FOLDER = "REPORT_FOLDER"
 
     def name(self):
         return "migrate_validate"
@@ -58,6 +61,9 @@ class MigrateAlgorithm(QgsProcessingAlgorithm):
             self.SCHEMA, "Target schema (overrides the configuration)", optional=True))
         self.addParameter(QgsProcessingParameterFeatureSink(
             self.ERRORS, "Validation errors", QgsProcessing.TypeVectorPoint))
+        self.addParameter(QgsProcessingParameterFolderDestination(
+            self.REPORT_FOLDER, "Report folder (PDF + CSV, optional)", optional=True,
+            createByDefault=False))
         self.addOutput(QgsProcessingOutputNumber("FINDINGS", "Number of findings"))
         self.addOutput(QgsProcessingOutputNumber("LOADED", "Features loaded to PostGIS"))
 
@@ -93,4 +99,14 @@ class MigrateAlgorithm(QgsProcessingAlgorithm):
         for feature in errors.getFeatures():
             sink.addFeature(feature)
         loaded = sum(result.load.loaded.values()) if result.load else 0
-        return {self.ERRORS: dest_id, "FINDINGS": len(result.report.findings), "LOADED": loaded}
+        outputs = {self.ERRORS: dest_id, "FINDINGS": len(result.report.findings),
+                   "LOADED": loaded}
+        folder = self.parameterAsString(parameters, self.REPORT_FOLDER, context)
+        if folder:
+            try:
+                written = export_reports(result, folder, label=config.label)
+            except OSError as exc:
+                raise QgsProcessingException(f"Could not write the report: {exc}") from exc
+            feedback.pushInfo("Report written: " + ", ".join(str(p) for p in written))
+            outputs[self.REPORT_FOLDER] = folder
+        return outputs

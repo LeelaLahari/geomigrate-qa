@@ -30,6 +30,7 @@ from qgis.PyQt.QtWidgets import (
 
 from ..core.mapping import MappingError
 from ..core.postgis_loader import LoadError, PgConnection
+from ..core.report_pdf import export_reports
 from ..core.rule_config import RuleConfigError
 from ..core.runconfig import (
     DEFAULT_RULES,
@@ -82,6 +83,7 @@ class MigrationDialog(QDialog):
         self.iface = iface
         self.project = project or QgsProject.instance()
         self.last_result = None
+        self.last_label = ""
         self.setWindowTitle("GeoMigrate QA: migrate and validate")
         self.resize(820, 700)
         self._build()
@@ -144,6 +146,10 @@ class MigrationDialog(QDialog):
             button.clicked.connect(handler)
             buttons.addWidget(button)
         buttons.addStretch()
+        self.export_button = QPushButton("Export report...")
+        self.export_button.setEnabled(False)
+        self.export_button.clicked.connect(self.export_report_dialog)
+        buttons.addWidget(self.export_button)
         self.run_button = QPushButton("Run")
         self.run_button.setDefault(True)
         self.run_button.clicked.connect(self.run)
@@ -270,9 +276,33 @@ class MigrationDialog(QDialog):
             self.run_button.setEnabled(True)
 
         self.last_result = result
+        self.last_label = config.sources[0].name if len(config.sources) == 1 else "migration run"
+        self.export_button.setEnabled(True)
         self.show_message(summarize(result))
         self._add_layers(result)
         return result
+
+    def export_report_to(self, folder):
+        """Write the PDF and CSV reports for the last run into folder."""
+        if self.last_result is None:
+            self.show_message("Run a migration first, then export its report.", error=True)
+            return []
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            paths = export_reports(self.last_result, folder, label=self.last_label)
+        except OSError as exc:
+            self.show_message(f"Could not write the report: {exc}", error=True)
+            return []
+        finally:
+            QApplication.restoreOverrideCursor()
+        listing = "\n".join(f"  {p}" for p in paths)
+        self.show_message(summarize(self.last_result) + f"\n\nReport written:\n{listing}")
+        return paths
+
+    def export_report_dialog(self):
+        folder = QFileDialog.getExistingDirectory(self, "Choose a folder for the report")
+        if folder:
+            self.export_report_to(folder)
 
     def _add_layers(self, result):
         for name, layer in result.clean.items():

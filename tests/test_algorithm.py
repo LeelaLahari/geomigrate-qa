@@ -60,3 +60,10 @@ def test_bad_configuration_is_a_clean_failure(tmp_path):
     with pytest.raises(QgsProcessingException, match="data file not found"):
         algorithm.processAlgorithm({"CONFIG": str(broken), "ERRORS": "memory:"},
                                    QgsProcessingContext(), QgsProcessingFeedback())
+
+
+def test_algorithm_can_write_the_report(tmp_path):
+    _, ok, _ = run({"CONFIG": str(SAMPLE / "demo_run.json"), "ERRORS": "memory:",
+                    "REPORT_FOLDER": str(tmp_path)})
+    assert ok and (tmp_path / "geomigrate_report.pdf").exists()
+    assert (tmp_path / "geomigrate_report_findings.csv").exists()

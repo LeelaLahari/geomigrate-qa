@@ -68,3 +68,16 @@ def test_postgis_needs_a_schema(dialog):
     dialog.load_box.setChecked(True)
     assert dialog.run() is None
     assert "target schema" in dialog.output.toPlainText()
+
+
+def test_export_needs_a_run_first_then_writes_files(dialog, tmp_path):
+    assert dialog.export_report_to(tmp_path) == []
+    assert "Run a migration first" in dialog.output.toPlainText()
+    assert not dialog.export_button.isEnabled()
+
+    dialog.load_config_from(SAMPLE / "demo_run.json")
+    dialog.run()
+    assert dialog.export_button.isEnabled()
+    paths = dialog.export_report_to(tmp_path)
+    assert {p.suffix for p in paths} == {".pdf", ".csv"}
+    assert "Report written" in dialog.output.toPlainText()
