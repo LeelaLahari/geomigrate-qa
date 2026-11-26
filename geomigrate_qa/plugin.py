@@ -1,7 +1,11 @@
+from pathlib import Path
+
 from qgis.core import QgsApplication
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
 MENU = "&GeoMigrate QA"
+ICON = Path(__file__).with_name("icon.png")
 
 
 class GeoMigratePlugin:
@@ -11,19 +15,25 @@ class GeoMigratePlugin:
         self.provider = None
         self.dialog = None
 
-    def initGui(self):
-        self.action = QAction("Migrate and validate...", self.iface.mainWindow())
-        self.action.triggered.connect(self.run)
-        self.iface.addPluginToMenu(MENU, self.action)
-        self._init_processing()
+    def initProcessing(self):
+        """Register the Processing provider (QGIS calls this early for hasProcessingProvider)."""
+        if self.provider is None:
+            from .algorithms.provider import GeoMigrateProvider
+            self.provider = GeoMigrateProvider()
+            QgsApplication.processingRegistry().addProvider(self.provider)
 
-    def _init_processing(self):
-        from .algorithms.provider import GeoMigrateProvider
-        self.provider = GeoMigrateProvider()
-        QgsApplication.processingRegistry().addProvider(self.provider)
+    def initGui(self):
+        self.initProcessing()
+        self.action = QAction(QIcon(str(ICON)), "Migrate and validate...", self.iface.mainWindow())
+        self.action.triggered.connect(self.run)
+        self.iface.addPluginToDatabaseMenu(MENU, self.action)
+        self.iface.addToolBarIcon(self.action)
 
     def unload(self):
-        self.iface.removePluginMenu(MENU, self.action)
+        if self.action is not None:
+            self.iface.removePluginDatabaseMenu(MENU, self.action)
+            self.iface.removeToolBarIcon(self.action)
+            self.action = None
         if self.provider is not None:
             QgsApplication.processingRegistry().removeProvider(self.provider)
             self.provider = None

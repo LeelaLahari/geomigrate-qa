@@ -295,4 +295,3 @@ def validate(layers: dict, config, only=None, reference=None) -> ValidationRepor
             report.findings.extend(
                 RULES[spec.rule](ctx, name, layers[name], spec, layer_rules.id_field))
     return report
-

@@ -60,7 +60,7 @@ class MigrateAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterString(
             self.SCHEMA, "Target schema (overrides the configuration)", optional=True))
         self.addParameter(QgsProcessingParameterFeatureSink(
-            self.ERRORS, "Validation errors", QgsProcessing.TypeVectorPoint))
+            self.ERRORS, "Validation errors", QgsProcessing.SourceType.TypeVectorPoint))
         self.addParameter(QgsProcessingParameterFolderDestination(
             self.REPORT_FOLDER, "Report folder (PDF + CSV, optional)", optional=True,
             createByDefault=False))

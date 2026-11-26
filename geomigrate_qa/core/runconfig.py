@@ -135,7 +135,8 @@ def save_run_config(config: RunConfig, path) -> None:
     data = {
         "label": config.label,
         "sources": {
-            s.name: {"file": portable_path(s.file, base), "template": portable_path(s.template, base)}
+            s.name: {"file": portable_path(s.file, base),
+                     "template": portable_path(s.template, base)}
             for s in config.sources},
         "rules": portable_path(config.rules, base, "rules"),
     }

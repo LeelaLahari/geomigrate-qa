@@ -1,6 +1,13 @@
 import pytest
 
-from geomigrate_qa.core.sqlutil import quote_ident, quote_literal
+from geomigrate_qa.core.sqlutil import (
+    count_rows_sql,
+    distinct_srid_sql,
+    qualified,
+    quote_ident,
+    quote_literal,
+    run_log_insert_sql,
+)
 
 
 def test_valid_identifiers_are_quoted():
@@ -29,3 +36,31 @@ def test_unstorable_values_are_refused():
         quote_literal(float("nan"))
     with pytest.raises(ValueError):
         quote_literal("a\x00b")
+
+
+def test_query_builders_produce_the_expected_sql():
+    assert qualified("demo", "poles") == '"demo"."poles"'
+    assert count_rows_sql("demo", "poles") == 'SELECT count(*) FROM "demo"."poles"'
+    assert distinct_srid_sql("demo_stg", "poles") == (
+        'SELECT DISTINCT ST_SRID("geom") FROM "demo_stg"."poles" WHERE "geom" IS NOT NULL')
+
+
+def test_query_builders_refuse_unsafe_names():
+    with pytest.raises(ValueError):
+        count_rows_sql("demo", 'poles"; DROP TABLE x; --')
+    with pytest.raises(ValueError):
+        distinct_srid_sql("demo", "poles", "geom; --")
+
+
+def test_log_insert_escapes_values_and_does_not_expand_dollars():
+    sql = run_log_insert_sql("demo", "geomigrate_run_log", "abc123", "x'); DROP TABLE t; --",
+                             "poles", 48, 35, 13, "loaded")
+    assert sql.startswith('INSERT INTO "demo"."geomigrate_run_log"')
+    assert "'x''); DROP TABLE t; --'" in sql and "48, 35, 13, 'loaded'" in sql
+    dollars = run_log_insert_sql("demo", "geomigrate_run_log", "r", "$log $v_run", "t", 1, 1, 0, "ok")
+    assert "'$log $v_run'" in dollars
+
+
+def test_log_insert_only_accepts_numbers_for_counts():
+    with pytest.raises(ValueError):
+        run_log_insert_sql("demo", "log", "r", "s", "t", "1; DROP TABLE x", 1, 0, "ok")

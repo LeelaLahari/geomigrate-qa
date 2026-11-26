@@ -24,6 +24,9 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: pip install -r requirements-data.txt
       - run: ruff check .
+      - run: pip install bandit
+      - name: Security scan (the same tool the QGIS plugin repository runs)
+        run: bandit -r geomigrate_qa -q
       - run: pytest -q
 
   # Full checks: every test, inside the official QGIS image, against a real PostGIS database.
@@ -54,4 +57,4 @@ jobs:
             -e PYTHONDONTWRITEBYTECODE=1 \
             -e GEOMIGRATE_PG_HOST=127.0.0.1 \
             qgis/qgis:3.44-noble \
-            sh -c "(python3 -m pip --version >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y -qq python3-pip)) && python3 -m pip install --break-system-packages pytest pytest-qgis && python3 -m pytest -q -rs -p no:cacheprovider"
+            sh -c "(python3 -m pip --version >/dev/null 2>&1 || (apt-get update -qq && apt-get install -y -qq python3-pip)) && python3 -m pip install --break-system-packages pytest pytest-qgis fastapi uvicorn python-multipart httpx && python3 -m pytest -q -rs -p no:cacheprovider"

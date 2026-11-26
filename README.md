@@ -53,16 +53,12 @@ Each rule has a severity (`error`, `warning`, `info`). Rule sets are JSON files,
 
 ## Quick start
 
-### 1. Install the plugin (development install)
+### 1. Install the plugin
 
-```
-git clone https://github.com/LeelaLahari/geomigrate-qa.git
-```
+Download `geomigrate_qa-0.1.1.zip` from the [latest release](https://github.com/LeelaLahari/geomigrate-qa/releases/latest), then in QGIS choose _Plugins > Manage and Install Plugins > Install from ZIP_.
 
-Link the inner `geomigrate_qa` folder into your QGIS profile's `python/plugins` folder (Windows, Command Prompt):
+To develop the plugin, clone the repository and link the inner `geomigrate_qa` folder into your QGIS profile's plugins folder (see the Development section).
 
-```
-mklink /J "%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\geomigrate_qa" "C:\path\to\geomigrate-qa\geomigrate_qa"
 ```
 
 Restart QGIS and enable **GeoMigrate QA** in _Plugins > Manage and Install Plugins_. Tick _Show also experimental plugins_ if it is not listed.
@@ -70,8 +66,10 @@ Restart QGIS and enable **GeoMigrate QA** in _Plugins > Manage and Install Plugi
 ### 2. Start PostGIS (optional: needed only to load data)
 
 ```
+
 docker run --name geomigrate-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=geomigrate -p 127.0.0.1:5432:5432 -v geomigrate_pgdata:/var/lib/postgresql/data -d postgis/postgis:16-3.4
-```
+
+````
 
 This password is for local development only.
 
@@ -115,7 +113,7 @@ A **run configuration** says which files, templates and rules make up one run. P
   "reference_gpkg": "clean/network.gpkg",
   "schema": "demo"
 }
-```
+````
 
 A **mapping template** turns one source layer into one target layer:
 
@@ -201,7 +199,7 @@ tests/                unit, QGIS and PostGIS tests
 
 ## License
 
-GPL-2.0-or-later. See `LICENSE`.
+GPL-2.0. See `LICENSE`.
 
 ## Author
 

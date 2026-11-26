@@ -20,8 +20,20 @@ def test_plugin_registers_and_unregisters_cleanly(qgis_app):
     plugin.initGui()
     registry = QgsApplication.processingRegistry()
     assert registry.algorithmById("geomigrate:migrate_validate") is not None
-    iface.addPluginToMenu.assert_called_once()
+    iface.addPluginToDatabaseMenu.assert_called_once()  # DB tool: Database menu
 
     plugin.unload()
     assert registry.algorithmById("geomigrate:migrate_validate") is None
-    iface.removePluginMenu.assert_called_once()
+    iface.removePluginDatabaseMenu.assert_called_once()
+
+
+def test_processing_provider_is_registered_only_once(qgis_app):
+    iface = MagicMock()
+    iface.mainWindow.return_value = QWidget()
+    plugin = classFactory(iface)
+    plugin.initProcessing()  # QGIS calls this early, then initGui calls it again
+    first = plugin.provider
+    plugin.initGui()
+    assert plugin.provider is first
+    plugin.unload()
+    assert QgsApplication.processingRegistry().algorithmById("geomigrate:migrate_validate") is None

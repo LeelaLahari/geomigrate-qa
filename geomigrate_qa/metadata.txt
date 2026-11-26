@@ -1,12 +1,18 @@
 [general]
 name=GeoMigrate QA
 qgisMinimumVersion=3.34
-description=Migrate CAD, KML/KMZ and Shapefile data to PostGIS with automated validation
-version=0.1.0
+qgisMaximumVersion=3.99
+description=Migrate CAD, KML/KMZ and Shapefile data to PostGIS with automated validation and reports
+about=Imports DXF, KML, KMZ, Shapefile, GeoJSON and GPKG data, maps it to a target schema with reusable JSON templates, reprojects and cleans it, and checks it with ten configurable rules (duplicates, missing values, invalid domains, dangling cable ends, out-of-extent features and more). Clean features are loaded to PostGIS in a single transaction; features with problems are quarantined in a validation_errors layer and table. Produces a PDF and CSV report. Works from a dialog and as a Processing algorithm. Rule sets and templates are plain JSON; example telecom templates are included.
+version=0.1.1
 author=Leela Lahari M
-email=hinamark88@gmail.com
-about=Imports DXF, KML/KMZ, Shapefile, GeoJSON and GPKG data, maps schemas, reprojects, validates with configurable rules, loads to PostGIS and reports errors.
+email=leelalaharim@gmail.com
 repository=https://github.com/LeelaLahari/geomigrate-qa
 tracker=https://github.com/LeelaLahari/geomigrate-qa/issues
-tags=migration,validation,postgis,dxf,kml,qa
+homepage=https://github.com/LeelaLahari/geomigrate-qa
+tags=migration,validation,data quality,postgis,dxf,kml,telecom,processing
+icon=icon.png
+category=Database
 experimental=True
+hasProcessingProvider=yes
+changelog=0.1.1: replaced string-built SQL with fixed templates (security scan), Qt6 enum fix. 0.1.0: first release (import, mapping, ten validation rules, PostGIS loader, dialog, Processing algorithm, PDF and CSV reports)

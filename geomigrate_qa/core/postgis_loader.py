@@ -16,7 +16,13 @@ from qgis.core import (
     QgsVectorLayerExporter,
 )
 
-from .sqlutil import quote_ident, quote_literal
+from .sqlutil import (
+    count_rows_sql,
+    distinct_srid_sql,
+    quote_ident,
+    quote_literal,
+    run_log_insert_sql,
+)
 
 GEOMETRY_COLUMN = "geom"
 RUN_LOG_TABLE = "geomigrate_run_log"
@@ -86,11 +92,9 @@ def _swap_sql(schema, staging, tables, run_id, source, stats, overwrite):
             parts.append(f"DROP TABLE IF EXISTS {s}.{t};")
         parts.append(f"ALTER TABLE {g}.{t} SET SCHEMA {s};")
         read = stats.get(table, {}).get("read", loaded)
-        parts.append(
-            f"INSERT INTO {log} (run_id, source, table_name, features_read, features_loaded, "
-            f"features_quarantined, status) VALUES ({quote_literal(run_id)}, "
-            f"{quote_literal(source)}, {quote_literal(table)}, {read}, {loaded}, "
-            f"{max(read - loaded, 0)}, 'loaded');")
+        parts.append(run_log_insert_sql(
+            schema, RUN_LOG_TABLE, run_id, source, table, read, loaded,
+            max(read - loaded, 0), "loaded"))
     return " ".join(parts)
 
 
@@ -104,7 +108,7 @@ def _drop_staging(conn, staging, tables):
 
 
 def count_rows(pg: PgConnection, schema, table) -> int:
-    rows = _run(pg.connect(), f"SELECT count(*) FROM {quote_ident(schema)}.{quote_ident(table)}")
+    rows = _run(pg.connect(), count_rows_sql(schema, table))
     return int(rows[0][0])
 
 
@@ -148,14 +152,13 @@ def load_layers(layers: dict, pg: PgConnection, schema: str, *, source="", stats
             if not _export_ok(code):
                 raise LoadError(f"Could not stage '{table}': {message}")
 
-            staged = int(_run(conn, f"SELECT count(*) FROM {quote_ident(staging)}.{t}")[0][0])
+            staged = int(_run(conn, count_rows_sql(staging, table))[0][0])
             if staged != layer.featureCount():
                 raise LoadError(f"'{table}': staged {staged} rows but expected "
                                 f"{layer.featureCount()}.")
             srid = layer.crs().postgisSrid()
             found = {row[0] for row in _run(
-                conn, f"SELECT DISTINCT ST_SRID({GEOMETRY_COLUMN}) FROM "
-                      f"{quote_ident(staging)}.{t} WHERE {GEOMETRY_COLUMN} IS NOT NULL")}
+                conn, distinct_srid_sql(staging, table, GEOMETRY_COLUMN))}
             if found - {srid}:
                 raise LoadError(f"'{table}': stored SRIDs {sorted(found)} differ from {srid}.")
             _run(conn, f"CREATE INDEX {quote_ident(table + '_geom_gix')} ON "
